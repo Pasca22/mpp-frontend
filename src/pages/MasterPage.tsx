@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 const MasterPage: React.FC = () => {
   return (
     <>
-      <div className="grid grid-cols-2 gap-44 place-content-center h-screen max-w-6/12">
+      <div className="grid grid-cols-2 gap-28 place-content-center h-screen max-w-6/12">
         {USERS.map((user) => (
           <Card
             key={user.userId}
