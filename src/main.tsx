@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.tsx";
 import DetailsPage from "./pages/DetailsPage.tsx";
 import UpdatePage from "./pages/UpdatePage.tsx";
+import AddPage from "./pages/AddPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,8 @@ const router = createBrowserRouter([
     path: "/:userId",
     element: <DetailsPage />,
   },
-  { path: "/update/:userid", element: <UpdatePage /> },
+  { path: "/update/:userId", element: <UpdatePage /> },
+  { path: "/add", element: <AddPage /> },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

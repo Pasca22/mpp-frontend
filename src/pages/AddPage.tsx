@@ -1,5 +1,4 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { USERS } from "@/constants/user";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -14,12 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const UpdatePage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
-
-  const user = USERS.find((user) => user.userId === userId);
-
+const AddPage: React.FC = () => {
   const formSchema = z.object({
+    userId: z.string(),
     username: z.string(),
     email: z.string(),
     password: z.string(),
@@ -31,37 +27,58 @@ const UpdatePage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: user?.username,
-      email: user?.email,
-      password: user?.password,
-      ip: user?.ip,
-      dog_name: user?.dog_name,
-      avatar: user?.avatar,
+      userId: "",
+      username: "",
+      email: "",
+      password: "",
+      ip: "",
+      dog_name: "",
+      avatar: "",
     },
   });
 
-  function updateEntity(values: z.infer<typeof formSchema>) {
-    const index = USERS.findIndex((user) => user.userId === userId);
-    if (index === -1) {
+  function addEntity(values: z.infer<typeof formSchema>) {
+    const userExists = USERS.find((user) => user.userId === values.userId);
+    if (userExists) {
+      alert("User already exists");
       return;
     }
 
-    USERS[index] = {
-      ...USERS[index],
-      ...values,
-    };
+    if (
+      values.userId === "" ||
+      values.username === "" ||
+      values.email === "" ||
+      values.password === "" ||
+      values.ip === "" ||
+      values.dog_name === ""
+    ) {
+      alert("Please fill all the fields");
+      return;
+    }
 
-    alert("User updated successfully");
+    USERS.push({
+      ...values,
+    });
+    alert("User added successfully");
   }
 
   return (
     <>
       <div className="flex justify-center">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(updateEntity)}
-            className="space-y-8"
-          >
+          <form onSubmit={form.handleSubmit(addEntity)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="userId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex justify-start">ID</FormLabel>
+                  <FormControl className="w-80">
+                    <Input placeholder="69696969" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="username"
@@ -69,7 +86,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Username</FormLabel>
                   <FormControl className="w-80">
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="boss123" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -81,7 +98,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="lol@mai.com" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -93,7 +110,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="catdog3" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -105,7 +122,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">IP</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="172.0.0.5" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -117,7 +134,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Dog name</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="rex" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -129,12 +146,17 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Avatar</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="good luck" {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <Button type="submit">Update</Button>
+            <Button
+              className="bg-green-500 hover:bg-green-600 px-10"
+              type="submit"
+            >
+              Add
+            </Button>
           </form>
         </Form>
       </div>
@@ -142,4 +164,4 @@ const UpdatePage: React.FC = () => {
   );
 };
 
-export default UpdatePage;
+export default AddPage;

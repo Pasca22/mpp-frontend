@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 
-interface User {
+type User = {
   userId: string;
   username: string;
   email: string;
@@ -8,7 +8,7 @@ interface User {
   password: string;
   ip: string;
   dog_name: string;
-}
+};
 
 function createRandomUser(): User {
   return {
@@ -22,6 +22,6 @@ function createRandomUser(): User {
   };
 }
 
-export const USERS: User[] = faker.helpers.multiple(createRandomUser, {
-  count: 6,
+export var USERS: User[] = faker.helpers.multiple(createRandomUser, {
+  count: 4,
 });

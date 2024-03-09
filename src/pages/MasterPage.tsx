@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { USERS } from "@/constants/user";
+import { USERS, USERS as initialUsers } from "@/constants/user";
 import {
   Card,
   CardDescription,
@@ -9,30 +9,72 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const MasterPage: React.FC = () => {
+  const [users, setUsers] = useState(initialUsers);
+
+  useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
+
+  function deleteEntity(userId: string) {
+    const index = users.findIndex((user) => user.userId === userId);
+    if (index === -1) {
+      return;
+    }
+
+    const updatedUsers = [...users];
+    updatedUsers.splice(index, 1);
+    USERS.splice(index, 1);
+    setUsers(updatedUsers);
+  }
+
   return (
     <>
-      <div className="grid grid-cols-2 gap-28 place-content-center h-screen max-w-6/12">
-        {USERS.map((user) => (
-          <Card
-            key={user.userId}
-            className="rounded-2xl border-2 shadow-xl hover:bg-slate-200"
-          >
-            <CardHeader>
-              <CardTitle>{user.username}</CardTitle>
-              <CardDescription>Email: {user.email}</CardDescription>
-            </CardHeader>
-            <CardFooter className="flex justify-between">
-              <Link to={`/update/${user.userId}`}>
-                <Button>Update</Button>
-              </Link>
-              <Link to={`/${user.userId}`}>
-                <Button className="bg-sky-600 hover:bg-sky-700">Details</Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        ))}
+      <h1 className="text-5xl text-center font-bold mt-2 mb-6">User List</h1>
+      <div className="flex justify-center">
+        <ul>
+          <li key={"add_button"}>
+            <Link to="/add">
+              <Button className="bg-green-500 hover:bg-green-600">
+                Add new entity
+              </Button>
+            </Link>
+          </li>
+          {users.map((user) => (
+            <li key={user.userId} className="my-4">
+              <Card
+                key={user.userId}
+                className="rounded-2xl px-20 border-2 shadow-xl hover:bg-slate-100"
+              >
+                <CardHeader>
+                  <CardTitle>{user.username}</CardTitle>
+                  <CardDescription>Email: {user.email}</CardDescription>
+                </CardHeader>
+                <CardFooter className="flex justify-between">
+                  <Link to={`/${user.userId}`}>
+                    <Button className="bg-sky-600 mx-2 hover:bg-sky-700">
+                      More...
+                    </Button>
+                  </Link>
+                  <Link to={`/update/${user.userId}`}>
+                    <Button className="mx-2 ">Update</Button>
+                  </Link>
+                  {/* <Button className="bg-red-600 mx-2  hover:bg-red-900">
+                    Delete
+                  </Button> */}
+                  <Button
+                    className="bg-red-600 mx-2  hover:bg-red-900"
+                    onClick={() => deleteEntity(user.userId)}
+                  >
+                    Delete
+                  </Button>
+                </CardFooter>
+              </Card>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );

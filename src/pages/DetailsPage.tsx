@@ -11,7 +11,7 @@ const DetailsPage: React.FC = () => {
   return (
     <>
       <div className="flex justify-center items-center h-screen">
-        <Card className="p-10 rounded-2xl border-2 shadow-xl hover:bg-slate-200">
+        <Card className="p-10 rounded-2xl border-2 shadow-xl hover:bg-slate-100">
           <CardHeader>
             <CardTitle>{user?.username}</CardTitle>
           </CardHeader>
@@ -22,7 +22,7 @@ const DetailsPage: React.FC = () => {
               <li className="py-1">IP: {user?.ip}</li>
               <li className="py-1">Owned dog name: {user?.dog_name}</li>
               <li className="flex justify-center py-1">
-                <img src={user?.avatar} alt={user?.username} />
+                <img src={user?.avatar} alt={"No avatar"} />
               </li>
             </ul>
           </CardContent>
