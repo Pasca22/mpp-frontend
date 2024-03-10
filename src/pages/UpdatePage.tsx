@@ -13,6 +13,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { UpdateIcon } from "@radix-ui/react-icons";
 
 const UpdatePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -43,6 +44,17 @@ const UpdatePage: React.FC = () => {
   function updateEntity(values: z.infer<typeof formSchema>) {
     const index = USERS.findIndex((user) => user.userId === userId);
     if (index === -1) {
+      return;
+    }
+
+    if (
+      values.username === "" ||
+      values.email === "" ||
+      values.password === "" ||
+      values.ip === "" ||
+      values.dog_name === ""
+    ) {
+      alert("Please fill all the fields");
       return;
     }
 
@@ -134,7 +146,10 @@ const UpdatePage: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Update</Button>
+            <Button type="submit">
+              <UpdateIcon className="w-5 h-5 mr-1" />
+              Update
+            </Button>
           </form>
         </Form>
       </div>

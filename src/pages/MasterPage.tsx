@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import {
+  PlusCircledIcon,
+  CrossCircledIcon,
+  UpdateIcon,
+} from "@radix-ui/react-icons";
 
 const MasterPage: React.FC = () => {
   const [users, setUsers] = useState(initialUsers);
@@ -38,6 +43,7 @@ const MasterPage: React.FC = () => {
           <li key={"add_button"}>
             <Link to="/add">
               <Button className="bg-green-500 hover:bg-green-600">
+                <PlusCircledIcon className="w-6 h-6 mr-1" />
                 Add new entity
               </Button>
             </Link>
@@ -59,15 +65,16 @@ const MasterPage: React.FC = () => {
                     </Button>
                   </Link>
                   <Link to={`/update/${user.userId}`}>
-                    <Button className="mx-2 ">Update</Button>
+                    <Button className="mx-2 ">
+                      <UpdateIcon className="w-5 h-5 mr-1" />
+                      Update
+                    </Button>
                   </Link>
-                  {/* <Button className="bg-red-600 mx-2  hover:bg-red-900">
-                    Delete
-                  </Button> */}
                   <Button
                     className="bg-red-600 mx-2  hover:bg-red-900"
                     onClick={() => deleteEntity(user.userId)}
                   >
+                    <CrossCircledIcon className="w-6 h-6 mr-1" />
                     Delete
                   </Button>
                 </CardFooter>

@@ -12,6 +12,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PlusCircledIcon } from "@radix-ui/react-icons";
 
 const AddPage: React.FC = () => {
   const formSchema = z.object({
@@ -155,6 +156,7 @@ const AddPage: React.FC = () => {
               className="bg-green-500 hover:bg-green-600 px-10"
               type="submit"
             >
+              <PlusCircledIcon className="w-6 h-6 mr-1" />
               Add
             </Button>
           </form>
