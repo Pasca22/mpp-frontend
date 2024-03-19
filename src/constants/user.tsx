@@ -23,5 +23,5 @@ function createRandomUser(): User {
 }
 
 export var USERS: User[] = faker.helpers.multiple(createRandomUser, {
-  count: 4,
+  count: 6,
 });

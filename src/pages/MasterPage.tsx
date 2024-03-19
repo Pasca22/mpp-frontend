@@ -15,13 +15,53 @@ import {
   CrossCircledIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const MasterPage: React.FC = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState(initialUsers.slice(0, 2));
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 2;
 
-  useEffect(() => {
-    setUsers(initialUsers);
-  }, [initialUsers]);
+  function usersByPage() {
+    const indexOfFirstUser = (currentPage - 1) * usersPerPage;
+    const indexOfLastUser = indexOfFirstUser + usersPerPage;
+    const currentUsers = USERS.slice(indexOfFirstUser, indexOfLastUser);
+    setUsers(currentUsers);
+  }
+
+  function pressNext() {
+    if (currentPage === Math.ceil(initialUsers.length / usersPerPage)) {
+      return;
+    }
+    setCurrentPage(currentPage + 1);
+    usersByPage();
+  }
+
+  function pressBack() {
+    if (currentPage === 1) {
+      return;
+    }
+    setCurrentPage(currentPage - 1);
+    usersByPage();
+  }
 
   function deleteEntity(userId: string) {
     const index = users.findIndex((user) => user.userId === userId);
@@ -33,7 +73,48 @@ const MasterPage: React.FC = () => {
     updatedUsers.splice(index, 1);
     USERS.splice(index, 1);
     setUsers(updatedUsers);
+    usersByPage();
   }
+
+  function sortByName() {
+    const sortedUsers = [...users].sort((a, b) =>
+      a.username.localeCompare(b.username)
+    );
+    setUsers(sortedUsers);
+  }
+
+  type lengthMap = {
+    [key: string]: number;
+  };
+
+  function usernameByNrOfCharacters() {
+    const usersLength: lengthMap = {};
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].username.length in usersLength) {
+        usersLength[users[i].username.length] += 1;
+      } else {
+        usersLength[users[i].username.length] = 1;
+      }
+    }
+    return usersLength;
+  }
+
+  useEffect(() => {
+    usersByPage();
+  }, [currentPage]);
+
+  const data = {
+    labels: Object.keys(usernameByNrOfCharacters()),
+    datasets: [
+      {
+        label: "Usernames by number of character",
+        data: Object.values(usernameByNrOfCharacters()),
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
 
   return (
     <>
@@ -47,6 +128,11 @@ const MasterPage: React.FC = () => {
                 Add new entity
               </Button>
             </Link>
+          </li>
+          <li>
+            <Button className="mt-3" onClick={sortByName}>
+              Sort by name
+            </Button>
           </li>
           {users.map((user) => (
             <li key={user.userId} className="my-4">
@@ -81,6 +167,14 @@ const MasterPage: React.FC = () => {
               </Card>
             </li>
           ))}
+          <li>
+            <Bar data={data} />
+          </li>
+          <li className="flex justify-around mt-3">
+            <Button onClick={pressBack}>Back</Button>
+            <p>{currentPage}</p>
+            <Button onClick={pressNext}>Next</Button>
+          </li>
         </ul>
       </div>
     </>
