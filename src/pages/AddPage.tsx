@@ -16,7 +16,7 @@ import { PlusCircledIcon } from "@radix-ui/react-icons";
 
 const AddPage: React.FC = () => {
   const formSchema = z.object({
-    userId: z.string(),
+    id: z.coerce.number(),
     username: z.string(),
     email: z.string(),
     password: z.string(),
@@ -28,7 +28,7 @@ const AddPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      userId: "",
+      id: -1,
       username: "",
       email: "",
       password: "",
@@ -39,14 +39,14 @@ const AddPage: React.FC = () => {
   });
 
   function addEntity(values: z.infer<typeof formSchema>) {
-    const userExists = USERS.find((user) => user.userId === values.userId);
+    const userExists = USERS.find((user) => user.id === values.id);
     if (userExists) {
       alert("User already exists");
       return;
     }
 
     if (
-      values.userId === "" ||
+      values.id < 1 ||
       values.username === "" ||
       values.email === "" ||
       values.password === "" ||
@@ -70,7 +70,7 @@ const AddPage: React.FC = () => {
           <form onSubmit={form.handleSubmit(addEntity)} className="space-y-8">
             <FormField
               control={form.control}
-              name="userId"
+              name="id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex justify-start">ID</FormLabel>
@@ -124,18 +124,6 @@ const AddPage: React.FC = () => {
                   <FormLabel className="flex justify-start">IP</FormLabel>
                   <FormControl>
                     <Input placeholder="172.0.0.5" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dog_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Dog name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="rex" {...field} />
                   </FormControl>
                 </FormItem>
               )}

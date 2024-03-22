@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { USERS, USERS as initialUsers } from "@/constants/user";
+import { USERS, USERS as initialUsers, User } from "@/constants/user";
 import {
   Card,
   CardDescription,
@@ -36,7 +36,7 @@ ChartJS.register(
 );
 
 const MasterPage: React.FC = () => {
-  const [users, setUsers] = useState(initialUsers.slice(0, 2));
+  const [users, setUsers] = useState<User[]>(initialUsers.slice(0, 2));
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 2;
 
@@ -63,12 +63,11 @@ const MasterPage: React.FC = () => {
     usersByPage();
   }
 
-  function deleteEntity(userId: string) {
-    const index = users.findIndex((user) => user.userId === userId);
+  function deleteEntity(userId: number) {
+    const index = users.findIndex((user) => user.id === userId);
     if (index === -1) {
       return;
     }
-
     const updatedUsers = [...users];
     updatedUsers.splice(index, 1);
     USERS.splice(index, 1);
@@ -106,9 +105,9 @@ const MasterPage: React.FC = () => {
             </Button>
           </li>
           {users.map((user) => (
-            <li key={user.userId} className="my-4">
+            <li key={user.id} className="my-4">
               <Card
-                key={user.userId}
+                key={user.id}
                 className="rounded-2xl px-20 border-2 shadow-xl hover:bg-slate-100"
               >
                 <CardHeader>
@@ -116,12 +115,12 @@ const MasterPage: React.FC = () => {
                   <CardDescription>Email: {user.email}</CardDescription>
                 </CardHeader>
                 <CardFooter className="flex justify-between">
-                  <Link to={`/${user.userId}`}>
+                  <Link to={`/${user.id}`}>
                     <Button className="bg-sky-600 mx-2 hover:bg-sky-700">
                       More...
                     </Button>
                   </Link>
-                  <Link to={`/update/${user.userId}`}>
+                  <Link to={`/update/${user.id}`}>
                     <Button className="mx-2 ">
                       <UpdateIcon className="w-5 h-5 mr-1" />
                       Update
@@ -129,7 +128,7 @@ const MasterPage: React.FC = () => {
                   </Link>
                   <Button
                     className="bg-red-600 mx-2  hover:bg-red-900"
-                    onClick={() => deleteEntity(user.userId)}
+                    onClick={() => deleteEntity(user.id)}
                   >
                     <CrossCircledIcon className="w-6 h-6 mr-1" />
                     Delete
@@ -138,7 +137,7 @@ const MasterPage: React.FC = () => {
               </Card>
             </li>
           ))}
-          <li>
+          <li className="flex justify-around items-center mt-3">
             <MyChart usersOnPage={users} />
           </li>
           <li className="flex justify-around items-center mt-3">

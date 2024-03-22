@@ -18,14 +18,13 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 const UpdatePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
 
-  const user = USERS.find((user) => user.userId === userId);
+  const user = USERS.find((user) => user.id.toString() === userId);
 
   const formSchema = z.object({
     username: z.string(),
     email: z.string(),
     password: z.string(),
     ip: z.string(),
-    dog_name: z.string(),
     avatar: z.string(),
   });
 
@@ -36,13 +35,12 @@ const UpdatePage: React.FC = () => {
       email: user?.email,
       password: user?.password,
       ip: user?.ip,
-      dog_name: user?.dog_name,
       avatar: user?.avatar,
     },
   });
 
   function updateEntity(values: z.infer<typeof formSchema>) {
-    const index = USERS.findIndex((user) => user.userId === userId);
+    const index = USERS.findIndex((user) => user.id.toString() === userId);
     if (index === -1) {
       return;
     }
@@ -51,8 +49,7 @@ const UpdatePage: React.FC = () => {
       values.username === "" ||
       values.email === "" ||
       values.password === "" ||
-      values.ip === "" ||
-      values.dog_name === ""
+      values.ip === ""
     ) {
       alert("Please fill all the fields");
       return;
@@ -116,18 +113,6 @@ const UpdatePage: React.FC = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex justify-start">IP</FormLabel>
-                  <FormControl>
-                    <Input placeholder="shadcn" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dog_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Dog name</FormLabel>
                   <FormControl>
                     <Input placeholder="shadcn" {...field} />
                   </FormControl>

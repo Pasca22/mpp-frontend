@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const DetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
 
-  const user = USERS.find((user) => user.userId === userId);
+  const user = USERS.find((user) => user.id.toString() === userId);
 
   return (
     <>
@@ -20,7 +20,6 @@ const DetailsPage: React.FC = () => {
               <li className="py-1">Email: {user?.email}</li>
               <li className="py-1">Password: {user?.password}</li>
               <li className="py-1">IP: {user?.ip}</li>
-              <li className="py-1">Owned dog name: {user?.dog_name}</li>
               <li className="flex justify-center py-1">
                 <img src={user?.avatar} alt={"No avatar"} />
               </li>
