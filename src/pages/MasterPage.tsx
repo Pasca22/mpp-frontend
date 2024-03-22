@@ -24,7 +24,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import MyChart from "@/components/ui/my_chart";
 
 ChartJS.register(
   CategoryScale,
@@ -83,38 +83,9 @@ const MasterPage: React.FC = () => {
     setUsers(sortedUsers);
   }
 
-  type lengthMap = {
-    [key: string]: number;
-  };
-
-  function usernameByNrOfCharacters() {
-    const usersLength: lengthMap = {};
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].username.length in usersLength) {
-        usersLength[users[i].username.length] += 1;
-      } else {
-        usersLength[users[i].username.length] = 1;
-      }
-    }
-    return usersLength;
-  }
-
   useEffect(() => {
     usersByPage();
   }, [currentPage]);
-
-  const data = {
-    labels: Object.keys(usernameByNrOfCharacters()),
-    datasets: [
-      {
-        label: "Usernames by number of character",
-        data: Object.values(usernameByNrOfCharacters()),
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
 
   return (
     <>
@@ -168,9 +139,9 @@ const MasterPage: React.FC = () => {
             </li>
           ))}
           <li>
-            <Bar data={data} />
+            <MyChart usersOnPage={users} />
           </li>
-          <li className="flex justify-around mt-3">
+          <li className="flex justify-around items-center mt-3">
             <Button onClick={pressBack}>Back</Button>
             <p>{currentPage}</p>
             <Button onClick={pressNext}>Next</Button>

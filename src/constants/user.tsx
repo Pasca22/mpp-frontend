@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 
-type User = {
+export type User = {
   userId: string;
   username: string;
   email: string;
