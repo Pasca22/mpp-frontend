@@ -64,10 +64,11 @@ const MasterPage: React.FC = () => {
   }
 
   function deleteEntity(userId: number) {
-    const index = users.findIndex((user) => user.id === userId);
+    const index = USERS.findIndex((user) => user.id === userId);
     if (index === -1) {
       return;
     }
+
     const updatedUsers = [...users];
     updatedUsers.splice(index, 1);
     USERS.splice(index, 1);
