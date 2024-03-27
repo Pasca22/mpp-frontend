@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { USERS, USERS as initialUsers, User } from "@/constants/user";
+import { USERS, USERS as initialUsers, User } from "@/model/user";
 import {
   Card,
   CardDescription,
@@ -25,6 +25,7 @@ import {
   Legend,
 } from "chart.js";
 import MyChart from "@/components/ui/my_chart";
+import { deleteUser } from "@/service/user_service";
 
 ChartJS.register(
   CategoryScale,
@@ -36,9 +37,13 @@ ChartJS.register(
 );
 
 const MasterPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(initialUsers.slice(0, 2));
+  const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 2;
+
+  useEffect(() => {
+    usersByPage();
+  }, [currentPage]);
 
   function usersByPage() {
     const indexOfFirstUser = (currentPage - 1) * usersPerPage;
@@ -48,7 +53,7 @@ const MasterPage: React.FC = () => {
   }
 
   function pressNext() {
-    if (currentPage === Math.ceil(initialUsers.length / usersPerPage)) {
+    if (currentPage >= Math.ceil(initialUsers.length / usersPerPage)) {
       return;
     }
     setCurrentPage(currentPage + 1);
@@ -72,6 +77,7 @@ const MasterPage: React.FC = () => {
     const updatedUsers = [...users];
     updatedUsers.splice(index, 1);
     USERS.splice(index, 1);
+    deleteUser(userId);
     setUsers(updatedUsers);
     usersByPage();
   }
@@ -83,13 +89,9 @@ const MasterPage: React.FC = () => {
     setUsers(sortedUsers);
   }
 
-  useEffect(() => {
-    usersByPage();
-  }, [currentPage]);
-
   return (
     <>
-      <h1 className="text-5xl text-center font-bold mt-2 mb-6">User List</h1>
+      <h1 className="text-5xl text-center font-bold mt-2 mb-6">Users List</h1>
       <div className="flex justify-center">
         <ul>
           <li key={"add_button"}>

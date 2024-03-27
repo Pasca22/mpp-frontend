@@ -1,10 +1,10 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { USERS } from "@/constants/user";
+import { USERS, User } from "@/model/user";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { UseFormReturn, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -14,11 +14,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { getUserById, updateUser } from "@/service/user_service";
+import { Errors, userValidation } from "@/validations/userValidation";
 
 const UpdatePage: React.FC = () => {
+  const [errors, setErrors] = React.useState<Errors>({});
   const { userId } = useParams<{ userId: string }>();
 
   const user = USERS.find((user) => user.id.toString() === userId);
+
+  // const [user, setUser] = React.useState<User | null>(null);
+
+  // React.useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const fetchedUser = await getUserById(Number(userId));
+  //     setUser(fetchedUser);
+  //   };
+
+  //   fetchUser();
+  // }, [userId]);
 
   const formSchema = z.object({
     username: z.string(),
@@ -45,13 +59,20 @@ const UpdatePage: React.FC = () => {
       return;
     }
 
+    const updateUserValues = {
+      id: index,
+      ...values,
+    };
+    const currentErrors = userValidation(updateUserValues);
+    setErrors(currentErrors);
+
     if (
-      values.username === "" ||
-      values.email === "" ||
-      values.password === "" ||
-      values.ip === ""
+      currentErrors.id ||
+      currentErrors.username ||
+      currentErrors.email ||
+      currentErrors.password ||
+      currentErrors.ip
     ) {
-      alert("Please fill all the fields");
       return;
     }
 
@@ -59,6 +80,8 @@ const UpdatePage: React.FC = () => {
       ...USERS[index],
       ...values,
     };
+
+    updateUser(Number(userId), USERS[index]);
 
     alert("User updated successfully");
   }
@@ -78,20 +101,30 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Username</FormLabel>
                   <FormControl className="w-80">
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder={user?.username} {...field} />
                   </FormControl>
+                  {errors.username && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.username}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
             <FormField
-              control={form.control}
+              control={form?.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex justify-start">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder={user?.email} {...field} />
                   </FormControl>
+                  {errors.email && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.email}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -99,11 +132,16 @@ const UpdatePage: React.FC = () => {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-w-80">
                   <FormLabel className="flex justify-start">Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder={user?.password} {...field} />
                   </FormControl>
+                  {errors.password && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.password}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -114,8 +152,13 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">IP</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder={user?.ip} {...field} />
                   </FormControl>
+                  {errors.ip && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.ip}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -126,7 +169,7 @@ const UpdatePage: React.FC = () => {
                 <FormItem>
                   <FormLabel className="flex justify-start">Avatar</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder={user?.avatar} {...field} />
                   </FormControl>
                 </FormItem>
               )}

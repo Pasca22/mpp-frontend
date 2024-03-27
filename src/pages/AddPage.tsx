@@ -1,5 +1,5 @@
 import React from "react";
-import { USERS } from "@/constants/user";
+import { USERS } from "@/model/user";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,15 +13,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
+import { addUser } from "@/service/user_service";
+import { Errors, userValidation } from "@/validations/userValidation";
 
 const AddPage: React.FC = () => {
+  const [errors, setErrors] = React.useState<Errors>({});
+
   const formSchema = z.object({
     id: z.coerce.number(),
     username: z.string(),
     email: z.string(),
     password: z.string(),
     ip: z.string(),
-    dog_name: z.string(),
     avatar: z.string(),
   });
 
@@ -33,7 +36,6 @@ const AddPage: React.FC = () => {
       email: "",
       password: "",
       ip: "",
-      dog_name: "",
       avatar: "",
     },
   });
@@ -45,21 +47,25 @@ const AddPage: React.FC = () => {
       return;
     }
 
+    const currentErrors = userValidation(values);
+    setErrors(currentErrors);
+
     if (
-      values.id < 1 ||
-      values.username === "" ||
-      values.email === "" ||
-      values.password === "" ||
-      values.ip === "" ||
-      values.dog_name === ""
+      currentErrors.id ||
+      currentErrors.username ||
+      currentErrors.email ||
+      currentErrors.password ||
+      currentErrors.ip
     ) {
-      alert("Please fill all the fields");
       return;
     }
 
     USERS.push({
       ...values,
     });
+
+    addUser(values);
+
     alert("User added successfully");
   }
 
@@ -77,6 +83,11 @@ const AddPage: React.FC = () => {
                   <FormControl className="w-80">
                     <Input placeholder="69696969" {...field} />
                   </FormControl>
+                  {errors.id && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.id}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -89,9 +100,15 @@ const AddPage: React.FC = () => {
                   <FormControl className="w-80">
                     <Input placeholder="boss123" {...field} />
                   </FormControl>
+                  {errors.username && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.username}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="email"
@@ -101,6 +118,11 @@ const AddPage: React.FC = () => {
                   <FormControl>
                     <Input placeholder="lol@mai.com" {...field} />
                   </FormControl>
+                  {errors.email && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.email}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -108,11 +130,16 @@ const AddPage: React.FC = () => {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="max-w-80">
                   <FormLabel className="flex justify-start">Password</FormLabel>
                   <FormControl>
                     <Input placeholder="catdog3" {...field} />
                   </FormControl>
+                  {errors.password && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.password}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -125,6 +152,11 @@ const AddPage: React.FC = () => {
                   <FormControl>
                     <Input placeholder="172.0.0.5" {...field} />
                   </FormControl>
+                  {errors.ip && (
+                    <p className="text-rose-600 flex content-start">
+                      {errors.ip}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />

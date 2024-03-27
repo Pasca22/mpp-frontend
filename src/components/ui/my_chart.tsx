@@ -9,7 +9,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { User } from "@/constants/user.tsx";
+import { User } from "@/model/user";
 
 ChartJS.register(
   CategoryScale,
