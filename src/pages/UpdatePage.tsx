@@ -55,7 +55,7 @@ const UpdatePage: React.FC = () => {
       id: index,
       ...values,
     };
-    const currentErrors = userValidation(updateUserValues);
+    const currentErrors = userValidation(updateUserValues, true);
     setErrors(currentErrors);
 
     if (

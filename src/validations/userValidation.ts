@@ -8,7 +8,7 @@ export type Errors = {
   ip?: string;
 };
 
-export function userValidation(values: User) {
+export function userValidation(values: User, existingUser: boolean) {
   const errors: Errors = {};
 
   const zeroTo255Regex = "(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])";
@@ -27,7 +27,7 @@ export function userValidation(values: User) {
 
   const passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
 
-  if (values.id < 0) {
+  if (!existingUser && values.id < 1) {
     errors.id = "ID must be a number greater than 0";
   }
 

@@ -50,7 +50,7 @@ const AddPage: React.FC = () => {
       return;
     }
 
-    const currentErrors = userValidation(values);
+    const currentErrors = userValidation(values, false);
     setErrors(currentErrors);
 
     if (
