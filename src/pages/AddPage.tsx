@@ -1,5 +1,4 @@
 import React from "react";
-import { USERS } from "@/model/user";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,9 +14,13 @@ import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { addUser } from "@/service/user_service";
 import { Errors, userValidation } from "@/validations/userValidation";
+import { UsersContext } from "@/App";
 
 const AddPage: React.FC = () => {
   const [errors, setErrors] = React.useState<Errors>({});
+
+  const UsersContextValue = React.useContext(UsersContext);
+  const allUsers = UsersContextValue.users;
 
   const formSchema = z.object({
     id: z.coerce.number(),
@@ -41,7 +44,7 @@ const AddPage: React.FC = () => {
   });
 
   function addEntity(values: z.infer<typeof formSchema>) {
-    const userExists = USERS.find((user) => user.id === values.id);
+    const userExists = allUsers.find((user) => user.id === values.id);
     if (userExists) {
       alert("User already exists");
       return;
@@ -60,7 +63,7 @@ const AddPage: React.FC = () => {
       return;
     }
 
-    USERS.push({
+    allUsers.push({
       ...values,
     });
 

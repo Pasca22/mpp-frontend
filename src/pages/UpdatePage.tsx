@@ -1,10 +1,9 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { USERS, User } from "@/model/user";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UseFormReturn, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -14,25 +13,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
-import { getUserById, updateUser } from "@/service/user_service";
+import { updateUser } from "@/service/user_service";
 import { Errors, userValidation } from "@/validations/userValidation";
+import { UsersContext } from "@/App";
 
 const UpdatePage: React.FC = () => {
   const [errors, setErrors] = React.useState<Errors>({});
   const { userId } = useParams<{ userId: string }>();
 
-  const user = USERS.find((user) => user.id.toString() === userId);
+  const UsersContextValue = React.useContext(UsersContext);
+  const allUsers = UsersContextValue.users;
 
-  // const [user, setUser] = React.useState<User | null>(null);
-
-  // React.useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const fetchedUser = await getUserById(Number(userId));
-  //     setUser(fetchedUser);
-  //   };
-
-  //   fetchUser();
-  // }, [userId]);
+  const user = allUsers.find((user) => user.id.toString() === userId);
 
   const formSchema = z.object({
     username: z.string(),
@@ -54,7 +46,7 @@ const UpdatePage: React.FC = () => {
   });
 
   function updateEntity(values: z.infer<typeof formSchema>) {
-    const index = USERS.findIndex((user) => user.id.toString() === userId);
+    const index = allUsers.findIndex((user) => user.id.toString() === userId);
     if (index === -1) {
       return;
     }
@@ -76,12 +68,12 @@ const UpdatePage: React.FC = () => {
       return;
     }
 
-    USERS[index] = {
-      ...USERS[index],
+    allUsers[index] = {
+      ...allUsers[index],
       ...values,
     };
 
-    updateUser(Number(userId), USERS[index]);
+    updateUser(Number(userId), allUsers[index]);
 
     alert("User updated successfully");
   }

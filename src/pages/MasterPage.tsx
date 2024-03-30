@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { USERS, USERS as initialUsers, User } from "@/model/user";
+import { User } from "@/model/user";
 import {
   Card,
   CardDescription,
@@ -26,6 +26,7 @@ import {
 } from "chart.js";
 import MyChart from "@/components/ui/my_chart";
 import { deleteUser } from "@/service/user_service";
+import { UsersContext } from "@/App";
 
 ChartJS.register(
   CategoryScale,
@@ -37,7 +38,9 @@ ChartJS.register(
 );
 
 const MasterPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const UsersContextValue = React.useContext(UsersContext);
+  const allUsers = UsersContextValue.users;
+  const [displayedUsers, setDisplayedUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 2;
 
@@ -48,12 +51,12 @@ const MasterPage: React.FC = () => {
   function usersByPage() {
     const indexOfFirstUser = (currentPage - 1) * usersPerPage;
     const indexOfLastUser = indexOfFirstUser + usersPerPage;
-    const currentUsers = USERS.slice(indexOfFirstUser, indexOfLastUser);
-    setUsers(currentUsers);
+    const currentUsers = allUsers.slice(indexOfFirstUser, indexOfLastUser);
+    setDisplayedUsers(currentUsers);
   }
 
   function pressNext() {
-    if (currentPage >= Math.ceil(initialUsers.length / usersPerPage)) {
+    if (currentPage >= Math.ceil(allUsers.length / usersPerPage)) {
       return;
     }
     setCurrentPage(currentPage + 1);
@@ -69,24 +72,24 @@ const MasterPage: React.FC = () => {
   }
 
   function deleteEntity(userId: number) {
-    const index = USERS.findIndex((user) => user.id === userId);
+    const index = allUsers.findIndex((user) => user.id === userId);
     if (index === -1) {
       return;
     }
 
-    const updatedUsers = [...users];
+    const updatedUsers = [...displayedUsers];
     updatedUsers.splice(index, 1);
-    USERS.splice(index, 1);
+    allUsers.splice(index, 1);
     deleteUser(userId);
-    setUsers(updatedUsers);
+    setDisplayedUsers(updatedUsers);
     usersByPage();
   }
 
   function sortByName() {
-    const sortedUsers = [...users].sort((a, b) =>
+    const sortedUsers = [...displayedUsers].sort((a, b) =>
       a.username.localeCompare(b.username)
     );
-    setUsers(sortedUsers);
+    setDisplayedUsers(sortedUsers);
   }
 
   return (
@@ -107,7 +110,7 @@ const MasterPage: React.FC = () => {
               Sort by name
             </Button>
           </li>
-          {users.map((user) => (
+          {displayedUsers.map((user) => (
             <li key={user.id} className="my-4">
               <Card
                 key={user.id}
@@ -141,7 +144,7 @@ const MasterPage: React.FC = () => {
             </li>
           ))}
           <li className="flex justify-around items-center mt-3">
-            <MyChart usersOnPage={users} />
+            <MyChart usersOnPage={displayedUsers} />
           </li>
           <li className="flex justify-around items-center mt-3">
             <Button onClick={pressBack}>Back</Button>

@@ -1,24 +1,15 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { USERS, User } from "@/model/user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUserById } from "@/service/user_service";
+import { UsersContext } from "@/App";
 
 const DetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
 
-  const user = USERS.find((user) => user.id.toString() === userId);
+  const UsersContextValue = React.useContext(UsersContext);
+  const allUsers = UsersContextValue.users;
 
-  // const [user, setUser] = React.useState<User | null>(null);
-
-  // React.useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const fetchedUser = await getUserById(Number(userId));
-  //     setUser(fetchedUser);
-  //   };
-
-  //   fetchUser();
-  // }, [userId]);
+  const user = allUsers.find((user) => user.id.toString() === userId);
 
   return (
     <>
