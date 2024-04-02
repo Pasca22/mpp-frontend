@@ -1,5 +1,3 @@
-import { getAllUsers } from "@/service/user_service";
-
 export type User = {
   id: number;
   username: string;
@@ -8,5 +6,3 @@ export type User = {
   avatar: string;
   ip: string;
 };
-
-export var USERS: User[] = await getAllUsers();
