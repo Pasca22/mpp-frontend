@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { addUser } from "@/service/user_service";
 import { Errors, userValidation } from "@/validations/userValidation";
-import { UsersContext } from "@/App";
+import { UsersContext } from "@/model/userContext";
 
 const AddPage: React.FC = () => {
   const [errors, setErrors] = React.useState<Errors>({});
@@ -62,10 +62,6 @@ const AddPage: React.FC = () => {
     ) {
       return;
     }
-
-    allUsers.push({
-      ...values,
-    });
 
     addUser(values);
 

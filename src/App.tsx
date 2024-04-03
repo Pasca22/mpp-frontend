@@ -7,13 +7,9 @@ import DetailsPage from "./pages/DetailsPage";
 import UpdatePage from "./pages/UpdatePage";
 import AddPage from "./pages/AddPage";
 import { getAllUsers } from "./service/user_service";
+import { UsersContext } from "./model/userContext";
 
 var USERS: User[] = await getAllUsers();
-
-export const UsersContext = React.createContext<{
-  users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-}>({ users: USERS, setUsers: () => {} });
 
 const router = createBrowserRouter([
   {

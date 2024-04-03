@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UsersContext } from "@/App";
+import { UsersContext } from "@/model/userContext";
 
 const DetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();

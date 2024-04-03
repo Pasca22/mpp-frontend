@@ -25,8 +25,8 @@ import {
   Legend,
 } from "chart.js";
 import MyChart from "@/components/ui/my_chart";
-import { deleteUser } from "@/service/user_service";
-import { UsersContext } from "@/App";
+import { deleteUser, getAllUsers } from "@/service/user_service";
+import { UsersContext } from "@/model/userContext";
 
 ChartJS.register(
   CategoryScale,
@@ -40,9 +40,16 @@ ChartJS.register(
 const MasterPage: React.FC = () => {
   const UsersContextValue = React.useContext(UsersContext);
   const allUsers = UsersContextValue.users;
+  const setAllUsers = UsersContextValue.setUsers;
   const [displayedUsers, setDisplayedUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 2;
+
+  useEffect(() => {
+    getAllUsers().then((data) => {
+      setAllUsers(data);
+    });
+  }, []);
 
   useEffect(() => {
     usersByPage();

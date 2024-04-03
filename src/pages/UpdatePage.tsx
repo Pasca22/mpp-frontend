@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { updateUser } from "@/service/user_service";
 import { Errors, userValidation } from "@/validations/userValidation";
-import { UsersContext } from "@/App";
+import { UsersContext } from "@/model/userContext";
 
 const UpdatePage: React.FC = () => {
   const [errors, setErrors] = React.useState<Errors>({});
@@ -68,12 +68,7 @@ const UpdatePage: React.FC = () => {
       return;
     }
 
-    allUsers[index] = {
-      ...allUsers[index],
-      ...values,
-    };
-
-    updateUser(Number(userId), allUsers[index]);
+    updateUser(Number(userId), updateUserValues);
 
     alert("User updated successfully");
   }
