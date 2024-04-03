@@ -10,28 +10,39 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { updateUser } from "@/service/user_service";
-import { Errors, userValidation } from "@/validations/userValidation";
 import { UsersContext } from "@/model/userContext";
 
 const UpdatePage: React.FC = () => {
-  const [errors, setErrors] = React.useState<Errors>({});
   const { userId } = useParams<{ userId: string }>();
 
   const UsersContextValue = React.useContext(UsersContext);
   const allUsers = UsersContextValue.users;
+  const setAllUsers = UsersContextValue.setUsers;
 
   const user = allUsers.find((user) => user.id.toString() === userId);
 
   const formSchema = z.object({
-    username: z.string(),
-    email: z.string(),
-    password: z.string(),
-    ip: z.string(),
-    avatar: z.string(),
+    username: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters" }),
+    email: z
+      .string()
+      .min(1, { message: "Email is required" })
+      .email("Invalid email address"),
+    password: z
+      .string()
+      .min(8, {
+        message:
+          "Password must contain at least 8 characters, including uppercase, lowercase letters and numbers",
+      })
+      .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
+    ip: z.string().min(1).ip(),
+    avatar: z.string().min(1),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,31 +56,11 @@ const UpdatePage: React.FC = () => {
     },
   });
 
-  function updateEntity(values: z.infer<typeof formSchema>) {
-    const index = allUsers.findIndex((user) => user.id.toString() === userId);
-    if (index === -1) {
-      return;
-    }
-
-    const updateUserValues = {
-      id: index,
-      ...values,
-    };
-    const currentErrors = userValidation(updateUserValues, true);
-    setErrors(currentErrors);
-
-    if (
-      currentErrors.id ||
-      currentErrors.username ||
-      currentErrors.email ||
-      currentErrors.password ||
-      currentErrors.ip
-    ) {
-      return;
-    }
-
-    updateUser(Number(userId), updateUserValues);
-
+  async function updateEntity(values: z.infer<typeof formSchema>) {
+    const updatedUser = await updateUser(Number(userId), values);
+    setAllUsers(
+      allUsers.map((user) => (user.id === Number(userId) ? updatedUser : user))
+    );
     alert("User updated successfully");
   }
 
@@ -90,11 +81,7 @@ const UpdatePage: React.FC = () => {
                   <FormControl className="w-80">
                     <Input placeholder={user?.username} {...field} />
                   </FormControl>
-                  {errors.username && (
-                    <p className="text-rose-600 flex content-start">
-                      {errors.username}
-                    </p>
-                  )}
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -107,11 +94,7 @@ const UpdatePage: React.FC = () => {
                   <FormControl>
                     <Input placeholder={user?.email} {...field} />
                   </FormControl>
-                  {errors.email && (
-                    <p className="text-rose-600 flex content-start">
-                      {errors.email}
-                    </p>
-                  )}
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -124,11 +107,7 @@ const UpdatePage: React.FC = () => {
                   <FormControl>
                     <Input placeholder={user?.password} {...field} />
                   </FormControl>
-                  {errors.password && (
-                    <p className="text-rose-600 flex content-start">
-                      {errors.password}
-                    </p>
-                  )}
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -141,11 +120,7 @@ const UpdatePage: React.FC = () => {
                   <FormControl>
                     <Input placeholder={user?.ip} {...field} />
                   </FormControl>
-                  {errors.ip && (
-                    <p className="text-rose-600 flex content-start">
-                      {errors.ip}
-                    </p>
-                  )}
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -158,6 +133,7 @@ const UpdatePage: React.FC = () => {
                   <FormControl>
                     <Input placeholder={user?.avatar} {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

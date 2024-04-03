@@ -80,15 +80,9 @@ const MasterPage: React.FC = () => {
 
   function deleteEntity(userId: number) {
     const index = allUsers.findIndex((user) => user.id === userId);
-    if (index === -1) {
-      return;
-    }
 
-    const updatedUsers = [...displayedUsers];
-    updatedUsers.splice(index, 1);
     allUsers.splice(index, 1);
     deleteUser(userId);
-    setDisplayedUsers(updatedUsers);
     usersByPage();
   }
 
