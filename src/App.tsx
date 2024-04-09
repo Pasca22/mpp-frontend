@@ -6,10 +6,19 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import DetailsPage from "./pages/DetailsPage";
 import UpdatePage from "./pages/UpdatePage";
 import AddPage from "./pages/AddPage";
-import { getAllUsers } from "./service/user_service";
+import { getAllUsers, checkServer } from "./service/user_service";
 import { UsersContext } from "./model/userContext";
 
-var USERS: User[] = await getAllUsers();
+var serverIsUp = true;
+await checkServer().catch(() => {
+  serverIsUp = false;
+});
+
+var USERS: User[] = [];
+
+if (serverIsUp) {
+  USERS = await getAllUsers();
+}
 
 const router = createBrowserRouter([
   {
@@ -26,6 +35,10 @@ const router = createBrowserRouter([
 
 function App() {
   const [users, setUsers] = React.useState<User[]>(USERS);
+
+  if (!serverIsUp) {
+    return <h1>Server is down. Please wait...</h1>;
+  }
 
   return (
     <>
