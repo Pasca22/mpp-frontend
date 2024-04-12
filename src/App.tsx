@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import MasterPage from "./pages/MasterPage";
 import { User } from "./model/user";
@@ -6,19 +6,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import DetailsPage from "./pages/DetailsPage";
 import UpdatePage from "./pages/UpdatePage";
 import AddPage from "./pages/AddPage";
-import { getAllUsers, checkServer } from "./service/user_service";
+import { getAllUsers } from "./service/user_service";
 import { UsersContext } from "./model/userContext";
-
-var serverIsUp = true;
-await checkServer().catch(() => {
-  serverIsUp = false;
-});
-
-var USERS: User[] = [];
-
-if (serverIsUp) {
-  USERS = await getAllUsers();
-}
+import io from "socket.io-client";
 
 const router = createBrowserRouter([
   {
@@ -34,7 +24,40 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const [users, setUsers] = React.useState<User[]>(USERS);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [serverIsUp, setServerIsUp] = React.useState(true);
+
+  async function fetchUsers() {
+    await getAllUsers()
+      .then((data) => {
+        setUsers(data);
+        setServerIsUp(true);
+      })
+      .catch(() => {
+        setServerIsUp(false);
+      });
+  }
+
+  useEffect(() => {
+    fetchUsers();
+  }, [serverIsUp]);
+
+  useEffect(() => {
+    const socket = io("http://localhost:9092");
+    socket.on("connect_error", (error: any) => {
+      console.error("Connection error:", error);
+    });
+    socket.on("connect_timeout", () => {
+      console.error("Connection timeout");
+    });
+    socket.on("newUser", (newUser: User) => {
+      setUsers((prevData) => [...prevData, newUser]);
+      console.log("New user added!", newUser);
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [setUsers]);
 
   if (!serverIsUp) {
     return <h1>Server is down. Please wait...</h1>;

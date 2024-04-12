@@ -25,7 +25,7 @@ import {
   Legend,
 } from "chart.js";
 import MyChart from "@/components/ui/my_chart";
-import { deleteUser, getAllUsers } from "@/service/user_service";
+import { deleteUser } from "@/service/user_service";
 import { UsersContext } from "@/model/userContext";
 
 ChartJS.register(
@@ -38,32 +38,24 @@ ChartJS.register(
 );
 
 const MasterPage: React.FC = () => {
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
+  const users = React.useContext(UsersContext).users;
   const [displayedUsers, setDisplayedUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 2;
 
   useEffect(() => {
-    getAllUsers().then((data) => {
-      setAllUsers(data);
-    });
-  }, []);
-
-  useEffect(() => {
     usersByPage();
-  }, [currentPage]);
+  }, [currentPage, users]);
 
   function usersByPage() {
     const indexOfFirstUser = (currentPage - 1) * usersPerPage;
     const indexOfLastUser = indexOfFirstUser + usersPerPage;
-    const currentUsers = allUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
     setDisplayedUsers(currentUsers);
   }
 
   function pressNext() {
-    if (currentPage >= Math.ceil(allUsers.length / usersPerPage)) {
+    if (currentPage >= Math.ceil(users.length / usersPerPage)) {
       return;
     }
     setCurrentPage(currentPage + 1);
@@ -79,9 +71,9 @@ const MasterPage: React.FC = () => {
   }
 
   function deleteEntity(userId: number) {
-    const index = allUsers.findIndex((user) => user.id === userId);
+    const index = users.findIndex((user) => user.id === userId);
 
-    allUsers.splice(index, 1);
+    users.splice(index, 1);
     deleteUser(userId);
     usersByPage();
   }

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { addUser } from "@/service/user_service";
 import { UsersContext } from "@/model/userContext";
+import Swal from "sweetalert2";
 
 const AddPage: React.FC = () => {
   const UsersContextValue = React.useContext(UsersContext);
@@ -54,7 +55,10 @@ const AddPage: React.FC = () => {
   async function addEntity(values: z.infer<typeof formSchema>) {
     const newUser = await addUser(values);
     setAllUsers([...allUsers, newUser]);
-    alert("User added successfully");
+    Swal.fire({
+      title: "User added successfully",
+      icon: "success",
+    });
   }
 
   return (

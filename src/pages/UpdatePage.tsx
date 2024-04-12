@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { updateUser } from "@/service/user_service";
 import { UsersContext } from "@/model/userContext";
+import Swal from "sweetalert2";
 
 const UpdatePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -61,7 +62,10 @@ const UpdatePage: React.FC = () => {
     setAllUsers(
       allUsers.map((user) => (user.id === Number(userId) ? updatedUser : user))
     );
-    alert("User updated successfully");
+    Swal.fire({
+      title: "User updated successfully",
+      icon: "success",
+    });
   }
 
   return (
