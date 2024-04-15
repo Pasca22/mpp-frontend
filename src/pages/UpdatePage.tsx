@@ -58,7 +58,15 @@ const UpdatePage: React.FC = () => {
   });
 
   async function updateEntity(values: z.infer<typeof formSchema>) {
-    const updatedUser = await updateUser(Number(userId), values);
+    const updatedEntity = {
+      username: values.username,
+      email: values.email,
+      password: values.password,
+      ip: values.ip,
+      avatar: values.avatar,
+      gameOrders: user?.gameOrders ?? [],
+    };
+    const updatedUser = await updateUser(Number(userId), updatedEntity);
     setAllUsers(
       allUsers.map((user) => (user.id === Number(userId) ? updatedUser : user))
     );

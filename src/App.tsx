@@ -8,7 +8,6 @@ import UpdatePage from "./pages/UpdatePage";
 import AddPage from "./pages/AddPage";
 import { getAllUsers } from "./service/user_service";
 import { UsersContext } from "./model/userContext";
-import io from "socket.io-client";
 
 const router = createBrowserRouter([
   {
@@ -16,10 +15,10 @@ const router = createBrowserRouter([
     element: <MasterPage />,
   },
   {
-    path: "/:userId",
+    path: "/user/:userId",
     element: <DetailsPage />,
   },
-  { path: "/update/:userId", element: <UpdatePage /> },
+  { path: "/update-user/:userId", element: <UpdatePage /> },
   { path: "/add", element: <AddPage /> },
 ]);
 
@@ -42,22 +41,22 @@ function App() {
     fetchUsers();
   }, [serverIsUp]);
 
-  useEffect(() => {
-    const socket = io("http://localhost:9092");
-    socket.on("connect_error", (error: any) => {
-      console.error("Connection error:", error);
-    });
-    socket.on("connect_timeout", () => {
-      console.error("Connection timeout");
-    });
-    socket.on("newUser", (newUser: User) => {
-      setUsers((prevData) => [...prevData, newUser]);
-      console.log("New user added!", newUser);
-    });
-    return () => {
-      socket.disconnect();
-    };
-  }, [setUsers]);
+  // useEffect(() => {
+  //   const socket = io("http://localhost:9092");
+  //   socket.on("connect_error", (error: any) => {
+  //     console.error("Connection error:", error);
+  //   });
+  //   socket.on("connect_timeout", () => {
+  //     console.error("Connection timeout");
+  //   });
+  //   socket.on("newUser", (newUser: User) => {
+  //     setUsers((prevData) => [...prevData, newUser]);
+  //     console.log("New user added!", newUser);
+  //   });
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, [setUsers]);
 
   if (!serverIsUp) {
     return <h1>Server is down. Please wait...</h1>;

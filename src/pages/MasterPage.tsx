@@ -94,7 +94,7 @@ const MasterPage: React.FC = () => {
             <Link to="/add">
               <Button className="bg-green-500 hover:bg-green-600">
                 <PlusCircledIcon className="w-6 h-6 mr-1" />
-                Add new entity
+                Add new User
               </Button>
             </Link>
           </li>
@@ -107,19 +107,19 @@ const MasterPage: React.FC = () => {
             <li key={user.id} className="my-4">
               <Card
                 key={user.id}
-                className="rounded-2xl px-20 border-2 shadow-xl hover:bg-slate-100"
+                className="rounded-2xl px-20 border-2 shadow-xl hover:bg-slate-50"
               >
                 <CardHeader>
                   <CardTitle>{user.username}</CardTitle>
                   <CardDescription>Email: {user.email}</CardDescription>
                 </CardHeader>
                 <CardFooter className="flex justify-between">
-                  <Link to={`/${user.id}`}>
+                  <Link to={`/user/${user.id}`}>
                     <Button className="bg-sky-600 mx-2 hover:bg-sky-700">
                       More...
                     </Button>
                   </Link>
-                  <Link to={`/update/${user.id}`}>
+                  <Link to={`/update-user/${user.id}`}>
                     <Button className="mx-2 ">
                       <UpdateIcon className="w-5 h-5 mr-1" />
                       Update

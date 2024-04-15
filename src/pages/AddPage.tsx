@@ -53,7 +53,15 @@ const AddPage: React.FC = () => {
   });
 
   async function addEntity(values: z.infer<typeof formSchema>) {
-    const newUser = await addUser(values);
+    const newEntity = {
+      username: values.username,
+      email: values.email,
+      password: values.password,
+      ip: values.ip,
+      avatar: values.avatar,
+      gameOrders: [],
+    };
+    const newUser = await addUser(newEntity);
     setAllUsers([...allUsers, newUser]);
     Swal.fire({
       title: "User added successfully",

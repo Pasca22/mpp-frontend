@@ -1,3 +1,5 @@
+import { GameOrder } from "./gameOrder";
+
 export type User = {
   id: number;
   username: string;
@@ -5,4 +7,5 @@ export type User = {
   email: string;
   avatar: string;
   ip: string;
+  gameOrders: GameOrder[];
 };
