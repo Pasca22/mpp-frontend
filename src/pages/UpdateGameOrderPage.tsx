@@ -63,12 +63,18 @@ const UpdateGameOrderPage: React.FC = () => {
     };
 
     for (let user of allUsers) {
+      let isDone = false;
       for (let gameOrder of user.gameOrders) {
         if (gameOrder.id === Number(gameOrderId)) {
           gameOrder.name = updatedEntity.name;
           gameOrder.price = updatedEntity.price;
           gameOrder.description = updatedEntity.description;
+          isDone = true;
+          break;
         }
+      }
+      if (isDone) {
+        break;
       }
     }
 
