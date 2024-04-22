@@ -8,6 +8,8 @@ import UpdatePage from "./pages/UpdatePage";
 import AddPage from "./pages/AddPage";
 import { getAllUsers } from "./service/user_service";
 import { UsersContext } from "./model/userContext";
+import AddGameOrderPage from "./pages/AddGameOrderPage";
+import UpdateGameOrderPage from "./pages/UpdateGameOrderPage";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +21,9 @@ const router = createBrowserRouter([
     element: <DetailsPage />,
   },
   { path: "/update-user/:userId", element: <UpdatePage /> },
-  { path: "/add", element: <AddPage /> },
+  { path: "/add-user", element: <AddPage /> },
+  { path: "/add-gameOrder/:userId", element: <AddGameOrderPage /> },
+  { path: "/update-gameOrder/:gameOrderId", element: <UpdateGameOrderPage /> },
 ]);
 
 function App() {

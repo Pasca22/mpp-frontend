@@ -91,7 +91,7 @@ const MasterPage: React.FC = () => {
       <div className="flex justify-center">
         <ul>
           <li key={"add_button"}>
-            <Link to="/add">
+            <Link to="/add-user">
               <Button className="bg-green-500 hover:bg-green-600">
                 <PlusCircledIcon className="w-6 h-6 mr-1" />
                 Add new User

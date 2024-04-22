@@ -1,15 +1,33 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersContext } from "@/model/userContext";
+import { Button } from "@/components/ui/button";
+import {
+  CrossCircledIcon,
+  PlusCircledIcon,
+  UpdateIcon,
+} from "@radix-ui/react-icons";
+import { deleteGameOrder } from "@/service/gameOrder_service";
 
 const DetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
 
   const UsersContextValue = React.useContext(UsersContext);
   const allUsers = UsersContextValue.users;
+  const setAllUsers = UsersContextValue.setUsers;
 
   const user = allUsers.find((user) => user.id.toString() === userId);
+
+  function deleteEntity(gameOrderId: number) {
+    const newGameOrders = user?.gameOrders.filter(
+      (gameOrder) => gameOrder.id !== gameOrderId
+    );
+    user!.gameOrders = newGameOrders!;
+    setAllUsers([...allUsers]);
+
+    deleteGameOrder(gameOrderId);
+  }
 
   return (
     <>
@@ -45,9 +63,32 @@ const DetailsPage: React.FC = () => {
                       <p>Game: {order.name}</p>
                       <p>Price: {order.price}</p>
                       <p>Description: {order.description}</p>
+                      <div className="flex justify-between m-3">
+                        <Button
+                          className="bg-red-600 mx-2  hover:bg-red-900"
+                          onClick={() => deleteEntity(order.id)}
+                        >
+                          <CrossCircledIcon className="w-6 h-6 mr-1" />
+                          Delete
+                        </Button>
+                        <Link to={`/update-gameOrder/${order.id}`}>
+                          <Button className="mx-2 ">
+                            <UpdateIcon className="w-5 h-5 mr-1" />
+                            Update
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   ))
                 )}
+              </li>
+              <li className="my-4">
+                <Link to={`/add-gameOrder/${userId}`}>
+                  <Button className="bg-green-500 hover:bg-green-600">
+                    <PlusCircledIcon className="w-6 h-6 mr-1" />
+                    Add new game order
+                  </Button>
+                </Link>
               </li>
             </ul>
           </CardContent>
