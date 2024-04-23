@@ -1,4 +1,5 @@
 import { GameOrder } from "@/model/gameOrder";
+import { TableEntity } from "@/model/tableEntity";
 import axios from "axios";
 
 const REST_API_BASE_URL = "http://localhost:8080/api/game-orders";
@@ -16,3 +17,8 @@ export const updateGameOrder = async (id: number, gameOrder: Omit<GameOrder, "id
 export const deleteGameOrder = async (id: number): Promise<void> => {
   await axios.delete(`${REST_API_BASE_URL}/${id}`);
 };
+
+export const getTableEntities = async (page: number): Promise<TableEntity[]> => {
+  const response = await axios.get<TableEntity[]>(`${REST_API_BASE_URL}/table/${page}`);
+  return response.data;
+}

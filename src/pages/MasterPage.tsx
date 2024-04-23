@@ -90,6 +90,11 @@ const MasterPage: React.FC = () => {
       <h1 className="text-5xl text-center font-bold mt-2 mb-6">Users List</h1>
       <div className="flex justify-center">
         <ul>
+          <li key={"table_button"} className="mb-3">
+            <Link to="/table">
+              <Button>Big Table</Button>
+            </Link>
+          </li>
           <li key={"add_button"}>
             <Link to="/add-user">
               <Button className="bg-green-500 hover:bg-green-600">

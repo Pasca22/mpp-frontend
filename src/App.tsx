@@ -10,6 +10,9 @@ import { getAllUsers } from "./service/user_service";
 import { UsersContext } from "./model/userContext";
 import AddGameOrderPage from "./pages/AddGameOrderPage";
 import UpdateGameOrderPage from "./pages/UpdateGameOrderPage";
+import BigTable from "./pages/BigTable";
+import { TableEntity } from "./model/tableEntity";
+import { getTableEntities } from "./service/gameOrder_service";
 
 const router = createBrowserRouter([
   {
@@ -24,55 +27,35 @@ const router = createBrowserRouter([
   { path: "/add-user", element: <AddPage /> },
   { path: "/add-gameOrder/:userId", element: <AddGameOrderPage /> },
   { path: "/update-gameOrder/:gameOrderId", element: <UpdateGameOrderPage /> },
+  { path: "/table", element: <BigTable /> },
 ]);
 
 function App() {
   const [users, setUsers] = React.useState<User[]>([]);
-  const [serverIsUp, setServerIsUp] = React.useState(true);
+  const [table, setTable] = React.useState<TableEntity[]>([]);
+  const [tablePage, setTablePage] = React.useState(1);
+
+  const fetchTable = async () => {
+    const newTable = await getTableEntities(1);
+    setTable(newTable);
+  };
 
   function fetchUsers() {
-    getAllUsers()
-      .then((data) => {
-        setUsers(data);
-        setServerIsUp(true);
-      })
-      .catch(() => {
-        setServerIsUp(false);
-      });
+    getAllUsers().then((data) => {
+      setUsers(data);
+    });
   }
 
   useEffect(() => {
     fetchUsers();
-    const interval = setInterval(() => {
-      fetchUsers();
-    }, 3000);
-    return () => clearInterval(interval);
+    fetchTable();
   }, []);
-
-  // useEffect(() => {
-  //   const socket = io("http://localhost:9092");
-  //   socket.on("connect_error", (error: any) => {
-  //     console.error("Connection error:", error);
-  //   });
-  //   socket.on("connect_timeout", () => {
-  //     console.error("Connection timeout");
-  //   });
-  //   socket.on("newUser", (newUser: User) => {
-  //     setUsers((prevData) => [...prevData, newUser]);
-  //     console.log("New user added!", newUser);
-  //   });
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, [setUsers]);
-
-  if (!serverIsUp) {
-    return <h1>Server is down. Please wait...</h1>;
-  }
 
   return (
     <>
-      <UsersContext.Provider value={{ users, setUsers }}>
+      <UsersContext.Provider
+        value={{ users, setUsers, table, setTable, tablePage, setTablePage }}
+      >
         <RouterProvider router={router} />
       </UsersContext.Provider>
     </>
