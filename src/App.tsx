@@ -30,8 +30,8 @@ function App() {
   const [users, setUsers] = React.useState<User[]>([]);
   const [serverIsUp, setServerIsUp] = React.useState(true);
 
-  async function fetchUsers() {
-    await getAllUsers()
+  function fetchUsers() {
+    getAllUsers()
       .then((data) => {
         setUsers(data);
         setServerIsUp(true);
@@ -43,7 +43,11 @@ function App() {
 
   useEffect(() => {
     fetchUsers();
-  }, [serverIsUp]);
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   // useEffect(() => {
   //   const socket = io("http://localhost:9092");
