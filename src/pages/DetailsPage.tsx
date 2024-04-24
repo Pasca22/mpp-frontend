@@ -31,7 +31,7 @@ const DetailsPage: React.FC = () => {
 
   return (
     <>
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center">
         <Card className="p-10 rounded-2xl border-2 shadow-xl hover:bg-slate-50">
           <CardHeader>
             <CardTitle>{user?.username}</CardTitle>
