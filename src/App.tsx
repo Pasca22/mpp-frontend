@@ -1,60 +1,78 @@
-import React, { useEffect } from "react";
 import "./App.css";
-import MasterPage from "./pages/MasterPage";
-import { User } from "./model/user";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import Home from "./pages/Home";
 import DetailsPage from "./pages/DetailsPage";
-import UpdatePage from "./pages/UpdatePage";
-import AddPage from "./pages/AddPage";
-import { getAllUsers } from "./service/user_service";
-import { UsersContext } from "./model/userContext";
+import AuthGuard from "./pages/AuthGuard";
 import AddGameOrderPage from "./pages/AddGameOrderPage";
+import AddPage from "./pages/AddPage";
+import React from "react";
+import { UsersContext } from "./model/userContext";
+import { User } from "./model/user";
+import { GameOrder } from "./model/gameOrder";
+import UpdatePage from "./pages/UpdatePage";
 import UpdateGameOrderPage from "./pages/UpdateGameOrderPage";
-import BigTable from "./pages/BigTable";
-import { TableEntity } from "./model/tableEntity";
-import { getTableEntities } from "./service/gameOrder_service";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MasterPage />,
+    element: (
+      <AuthGuard>
+        <LoginPage />
+      </AuthGuard>
+    ),
   },
   {
-    path: "/user/:userId",
+    path: "/signup",
+    element: <SignupPage />,
+  },
+  {
+    path: "/home",
+    element: <Home />,
+  },
+  {
+    path: "/account",
     element: <DetailsPage />,
   },
-  { path: "/update-user/:userId", element: <UpdatePage /> },
-  { path: "/add-user", element: <AddPage /> },
-  { path: "/add-gameOrder/:userId", element: <AddGameOrderPage /> },
-  { path: "/update-gameOrder/:gameOrderId", element: <UpdateGameOrderPage /> },
-  { path: "/table", element: <BigTable /> },
+  {
+    path: "/place_game_order",
+    element: <AddGameOrderPage />,
+  },
+  {
+    path: "/update_game_order/:gameOrderId",
+    element: <UpdateGameOrderPage />,
+  },
+  {
+    path: "/add_users",
+    element: <AddPage />,
+  },
+  {
+    path: "/update_user/:userId",
+    element: <UpdatePage />,
+  },
+  {
+    path: "*",
+    element: <Home />,
+  },
 ]);
 
 function App() {
-  const [users, setUsers] = React.useState<User[]>([]);
-  const [table, setTable] = React.useState<TableEntity[]>([]);
-  const [tablePage, setTablePage] = React.useState(1);
-
-  const fetchTable = async () => {
-    const newTable = await getTableEntities(1);
-    setTable(newTable);
-  };
-
-  function fetchUsers() {
-    getAllUsers().then((data) => {
-      setUsers(data);
-    });
-  }
-
-  useEffect(() => {
-    fetchUsers();
-    fetchTable();
-  }, []);
+  const [allUsers, setAllUsers] = React.useState<User[]>([]);
+  const [gameOrders, setGameOrders] = React.useState<GameOrder[]>([]);
+  const [isDataRetrieved, setIsDataRetrieved] = React.useState(false);
 
   return (
     <>
       <UsersContext.Provider
-        value={{ users, setUsers, table, setTable, tablePage, setTablePage }}
+        value={{
+          allUsers,
+          setAllUsers,
+          gameOrders,
+          setGameOrders,
+          isDataRetrieved,
+          setIsDataRetrieved,
+        }}
       >
         <RouterProvider router={router} />
       </UsersContext.Provider>

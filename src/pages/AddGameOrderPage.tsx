@@ -2,6 +2,7 @@ import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Navigate, NavigateFunction, useNavigate } from "react-router-dom";
 import {
   Form,
   FormControl,
@@ -10,21 +11,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useParams } from "react-router-dom";
-import { addGameOrder } from "@/service/gameOrder_service";
-import { UsersContext } from "@/model/userContext";
-import Swal from "sweetalert2";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/service/auth_service";
+import { UsersContext } from "@/model/userContext";
+import { addGameOrder } from "@/service/user_service";
+import Swal from "sweetalert2";
 
 const AddGameOrderPage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
-
-  const user = allUsers.find((user) => user.id.toString() === userId);
+  let navigate: NavigateFunction = useNavigate();
+  const currentUser = getCurrentUser();
+  const gameOrders = React.useContext(UsersContext).gameOrders;
+  const setGameOrders = React.useContext(UsersContext).setGameOrders;
 
   const formSchema = z.object({
     name: z
@@ -45,75 +44,123 @@ const AddGameOrderPage: React.FC = () => {
     },
   });
 
-  async function addEntity(values: z.infer<typeof formSchema>) {
-    const newEntity = {
-      name: values.name,
-      price: values.price,
-      description: values.description,
-    };
-
-    const newGameOrder = await addGameOrder(Number(userId), newEntity);
-    user?.gameOrders.push(newGameOrder);
-    setAllUsers([...allUsers]);
-
-    Swal.fire({
-      title: "Game order added successfully",
-      icon: "success",
-    });
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
   }
+
+  const signout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
+
+  const userDetails = () => {
+    navigate("/account");
+  };
+
+  const goToHome = () => {
+    navigate("/home");
+  };
+
+  const addGameOrderEvent = (formValues: z.infer<typeof formSchema>) => {
+    addGameOrder(currentUser.id, formValues).then((response) => {
+      setGameOrders([...gameOrders, response.data]);
+      Swal.fire({
+        icon: "success",
+        title: "Game order added successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    });
+  };
+
   return (
     <>
-      <div className="flex justify-center">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(addEntity)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Game name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter game name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="Enter price" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter description" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="bg-green-500 hover:bg-green-600 px-10"
+      <div className="font-mono">
+        <header className="flex justify-end bg-gray-900 p-4">
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={goToHome}
+          >
+            Home
+          </span>
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={userDetails}
+          >
+            My account
+          </span>
+          <span
+            className="text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={signout}
+          >
+            Sign Out
+          </span>
+        </header>
+        <div className="flex justify-center mt-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(addGameOrderEvent)}
+              className="space-y-8"
             >
-              <PlusCircledIcon className="w-6 h-6 mr-1" />
-              Add
-            </Button>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Game name
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter game name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Price
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter price"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="bg-green-500 hover:bg-green-600 px-10"
+              >
+                <PlusCircledIcon className="w-6 h-6 mr-1" />
+                Add
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </>
   );

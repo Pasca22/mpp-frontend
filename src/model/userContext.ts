@@ -1,19 +1,19 @@
 import React from "react";
 import { User } from "./user";
-import { TableEntity } from "./tableEntity";
+import { GameOrder } from "./gameOrder";
 
 export const UsersContext = React.createContext<{
-  users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-  table: TableEntity[];
-  setTable: React.Dispatch<React.SetStateAction<TableEntity[]>>;
-  tablePage: number;
-  setTablePage: React.Dispatch<React.SetStateAction<number>>;
+  allUsers: User[];
+  setAllUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  gameOrders: GameOrder[];
+  setGameOrders: React.Dispatch<React.SetStateAction<GameOrder[]>>;
+  isDataRetrieved: boolean;
+  setIsDataRetrieved: React.Dispatch<React.SetStateAction<boolean>>;
 }>({ 
-  users: [], 
-  setUsers: () => {},
-  table: [],
-  setTable: () => {},
-  tablePage: 1,
-  setTablePage: () => {},
+  allUsers: [],
+  setAllUsers: () => {},
+  gameOrders: [],
+  setGameOrders: () => {},
+  isDataRetrieved: false,
+  setIsDataRetrieved: () => {},
 });

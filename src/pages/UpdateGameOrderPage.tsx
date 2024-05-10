@@ -1,7 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import {
+  Navigate,
+  NavigateFunction,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { z } from "zod";
 import {
   Form,
@@ -15,26 +20,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UsersContext } from "@/model/userContext";
 import { UpdateIcon } from "@radix-ui/react-icons";
-import { updateGameOrder } from "@/service/gameOrder_service";
 import Swal from "sweetalert2";
+import { getCurrentUser } from "@/service/auth_service";
+import { updateGameOrder } from "@/service/user_service";
 
 const UpdateGameOrderPage: React.FC = () => {
+  const currentUser = getCurrentUser();
+  let navigate: NavigateFunction = useNavigate();
   const { gameOrderId } = useParams<{ gameOrderId: string }>();
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
+  const gameOrders = React.useContext(UsersContext).gameOrders;
+  const setGameOrders = React.useContext(UsersContext).setGameOrders;
 
-  const findGameOrderById = (gameOrderId: string) => {
-    for (let user of allUsers) {
-      for (let gameOrder of user.gameOrders) {
-        if (gameOrder.id === Number(gameOrderId)) {
-          return gameOrder;
-        }
-      }
-    }
-  };
-
-  const gameOrder = findGameOrderById(gameOrderId ?? "");
+  const gameOrder = gameOrders.find(
+    (gameOrder) => gameOrder.id === Number(gameOrderId)
+  );
 
   const formSchema = z.object({
     name: z
@@ -55,94 +54,126 @@ const UpdateGameOrderPage: React.FC = () => {
     },
   });
 
-  async function updateEntity(values: z.infer<typeof formSchema>) {
-    const updatedEntity = {
-      name: values.name,
-      price: values.price,
-      description: values.description,
-    };
-
-    for (let user of allUsers) {
-      let isDone = false;
-      for (let gameOrder of user.gameOrders) {
-        if (gameOrder.id === Number(gameOrderId)) {
-          gameOrder.name = updatedEntity.name;
-          gameOrder.price = updatedEntity.price;
-          gameOrder.description = updatedEntity.description;
-          isDone = true;
-          break;
-        }
-      }
-      if (isDone) {
-        break;
-      }
-    }
-
-    setAllUsers([...allUsers]);
-    updateGameOrder(Number(gameOrderId), updatedEntity);
+  function updateEntity(values: z.infer<typeof formSchema>) {
+    updateGameOrder(Number(gameOrderId), values).then(() => {
+      setGameOrders((prevGameOrders) =>
+        prevGameOrders.map((gameOrder) =>
+          gameOrder.id === Number(gameOrderId)
+            ? { ...gameOrder, ...values }
+            : gameOrder
+        )
+      );
+    });
 
     Swal.fire({
       title: "Game order updated successfully",
       icon: "success",
+      showConfirmButton: false,
+      timer: 1500,
     });
   }
+
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
+  }
+
+  const signout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
+
+  const userDetails = () => {
+    navigate("/account");
+  };
+
+  const goToHome = () => {
+    navigate("/home");
+  };
   return (
     <>
-      <div className="flex justify-center">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(updateEntity)}
-            className="space-y-8"
+      <div className="font-mono">
+        <header className="flex justify-end bg-gray-900 p-4">
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={goToHome}
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Game name</FormLabel>
-                  <FormControl>
-                    <Input placeholder={gameOrder?.name} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder={gameOrder?.price?.toString()}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder={gameOrder?.description} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">
-              <UpdateIcon className="w-5 h-5 mr-1" />
-              Update
-            </Button>
-          </form>
-        </Form>
+            Home
+          </span>
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={userDetails}
+          >
+            My account
+          </span>
+          <span
+            className="text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={signout}
+          >
+            Sign Out
+          </span>
+        </header>
+        <div className="flex justify-center my-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(updateEntity)}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Game name
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder={gameOrder?.name} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Price
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder={gameOrder?.price?.toString()}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder={gameOrder?.description} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">
+                <UpdateIcon className="w-5 h-5 mr-1" />
+                Update
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </>
   );

@@ -1,5 +1,10 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import {
+  Navigate,
+  NavigateFunction,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,15 +22,16 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 import { updateUser } from "@/service/user_service";
 import { UsersContext } from "@/model/userContext";
 import Swal from "sweetalert2";
+import { getCurrentUser } from "@/service/auth_service";
 
 const UpdatePage: React.FC = () => {
+  const currentUser = getCurrentUser();
   const { userId } = useParams<{ userId: string }>();
+  const allUsers = React.useContext(UsersContext).allUsers;
+  const setAllUsers = React.useContext(UsersContext).setAllUsers;
+  let navigate: NavigateFunction = useNavigate();
 
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
-
-  const user = allUsers.find((user) => user.id.toString() === userId);
+  const user = allUsers.find((user) => user.id === Number(userId));
 
   const formSchema = z.object({
     username: z
@@ -35,15 +41,6 @@ const UpdatePage: React.FC = () => {
       .string()
       .min(1, { message: "Email is required" })
       .email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, {
-        message:
-          "Password must contain at least 8 characters, including uppercase, lowercase letters and numbers",
-      })
-      .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
-    ip: z.string().min(1).ip(),
-    avatar: z.string().min(1),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,110 +48,113 @@ const UpdatePage: React.FC = () => {
     defaultValues: {
       username: user?.username,
       email: user?.email,
-      password: user?.password,
-      ip: user?.ip,
-      avatar: user?.avatar,
     },
   });
 
-  async function updateEntity(values: z.infer<typeof formSchema>) {
-    const updatedEntity = {
-      username: values.username,
-      email: values.email,
-      password: values.password,
-      ip: values.ip,
-      avatar: values.avatar,
-      gameOrders: user?.gameOrders ?? [],
-    };
-    const updatedUser = await updateUser(Number(userId), updatedEntity);
-    setAllUsers(
-      allUsers.map((user) => (user.id === Number(userId) ? updatedUser : user))
+  function updateEntity(values: z.infer<typeof formSchema>) {
+    updateUser(Number(userId), values.username, values.email).then(
+      (response) => {
+        const user = response.data;
+        const index = allUsers.findIndex((user) => user.id === Number(userId));
+        setAllUsers((prev) => [
+          ...prev.slice(0, index),
+          user,
+          ...prev.slice(index + 1),
+        ]);
+      }
     );
+
     Swal.fire({
       title: "User updated successfully",
       icon: "success",
+      showConfirmButton: false,
+      timer: 1500,
     });
+  }
+
+  const signout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
+
+  const userDetails = () => {
+    navigate("/account");
+  };
+
+  const goToHome = () => {
+    navigate("/home");
+  };
+
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <>
-      <div className="flex justify-center">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(updateEntity)}
-            className="space-y-8"
+      <div className="font-mono">
+        <header className="flex justify-end bg-gray-900 p-4">
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={goToHome}
           >
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Username</FormLabel>
-                  <FormControl className="w-80">
-                    <Input placeholder={user?.username} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form?.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder={user?.email} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="max-w-80">
-                  <FormLabel className="flex justify-start">Password</FormLabel>
-                  <FormControl>
-                    <Input placeholder={user?.password} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ip"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">IP</FormLabel>
-                  <FormControl>
-                    <Input placeholder={user?.ip} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="avatar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Avatar</FormLabel>
-                  <FormControl>
-                    <Input placeholder={user?.avatar} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">
-              <UpdateIcon className="w-5 h-5 mr-1" />
-              Update
-            </Button>
-          </form>
-        </Form>
+            Home
+          </span>
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={userDetails}
+          >
+            My account
+          </span>
+          <span
+            className="text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={signout}
+          >
+            Sign Out
+          </span>
+        </header>
+        <div className="flex justify-center my-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(updateEntity)}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Username
+                    </FormLabel>
+                    <FormControl className="w-80">
+                      <Input placeholder={user?.username} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form?.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder={user?.email} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">
+                <UpdateIcon className="w-5 h-5 mr-1" />
+                Update
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </>
   );

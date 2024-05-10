@@ -1,98 +1,78 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UsersContext } from "@/model/userContext";
-import { Button } from "@/components/ui/button";
-import {
-  CrossCircledIcon,
-  PlusCircledIcon,
-  UpdateIcon,
-} from "@radix-ui/react-icons";
-import { deleteGameOrder } from "@/service/gameOrder_service";
+import { getCurrentUser } from "@/service/auth_service";
+import { Navigate, NavigateFunction, useNavigate } from "react-router-dom";
 
 const DetailsPage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const currentUser = getCurrentUser();
+  let navigate: NavigateFunction = useNavigate();
+  const avatar = "https://www.w3schools.com/howto/img_avatar.png";
 
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
+  const signout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
 
-  const user = allUsers.find((user) => user.id.toString() === userId);
+  const goToHome = () => {
+    navigate("/home");
+  };
 
-  function deleteEntity(gameOrderId: number) {
-    const newGameOrders = user?.gameOrders.filter(
-      (gameOrder) => gameOrder.id !== gameOrderId
-    );
-    user!.gameOrders = newGameOrders!;
-    setAllUsers([...allUsers]);
+  const isAdmin = currentUser?.roles.includes("ROLE_ADMIN");
+  const isModerator = currentUser?.roles.includes("ROLE_MODERATOR");
 
-    deleteGameOrder(gameOrderId);
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <>
-      <div className="flex justify-center items-center">
-        <Card className="p-10 rounded-2xl border-2 shadow-xl hover:bg-slate-50">
-          <CardHeader>
-            <CardTitle>{user?.username}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="py-1">
-              <li className="py-1">Email: {user?.email}</li>
-              <li className="py-1">Password: {user?.password}</li>
-              <li className="py-1">IP: {user?.ip}</li>
-              <li className="flex justify-center py-1">
-                <img
-                  src={user?.avatar}
-                  alt={"No avatar"}
-                  className="w-60 h-60 my-5 rounded-full"
-                />
-              </li>
-              <li>
-                <h1 className="text-center text-2xl font-semibold">
-                  Game orders:
-                </h1>
-                {user?.gameOrders.length === 0 ? (
-                  <p className="mt-2">No game orders</p>
-                ) : (
-                  user?.gameOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="mt-4 p-1 border-solid border-2 rounded-2xl hover:bg-slate-100"
-                    >
-                      <p>Game: {order.name}</p>
-                      <p>Price: {order.price}</p>
-                      <p>Description: {order.description}</p>
-                      <div className="flex justify-between m-3">
-                        <Button
-                          className="bg-red-600 mx-2  hover:bg-red-900"
-                          onClick={() => deleteEntity(order.id)}
-                        >
-                          <CrossCircledIcon className="w-6 h-6 mr-1" />
-                          Delete
-                        </Button>
-                        <Link to={`/update-gameOrder/${order.id}`}>
-                          <Button className="mx-2 ">
-                            <UpdateIcon className="w-5 h-5 mr-1" />
-                            Update
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </li>
-              <li className="my-4">
-                <Link to={`/add-gameOrder/${userId}`}>
-                  <Button className="bg-green-500 hover:bg-green-600">
-                    <PlusCircledIcon className="w-6 h-6 mr-1" />
-                    Add new game order
-                  </Button>
-                </Link>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+      <div className="font-mono">
+        <header className="flex justify-end bg-gray-900 p-4">
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer"
+            onClick={goToHome}
+          >
+            Home
+          </span>
+          <span
+            className="text-white text-lg mr-14 cursor-pointer"
+            onClick={signout}
+          >
+            Sign Out
+          </span>
+        </header>
+        <div className="mt-6 mx-32">
+          <h1 className="font-bold text-4xl">Account Details</h1>
+        </div>
+        {isAdmin && (
+          <div className="flex justify-center items-center mt-8">
+            <h1 className="text-2xl">You are an ADMIN</h1>
+          </div>
+        )}
+        {isModerator && (
+          <div className="flex justify-center items-center mt-8">
+            <h1 className="text-2xl">You are a MODERATOR</h1>
+          </div>
+        )}
+        <div className="flex justify-center items-center mt-8">
+          <Card className="p-10 rounded-2xl border-2 shadow-xl hover:bg-slate-50">
+            <CardHeader>
+              <CardTitle>{currentUser?.username}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="py-1">
+                <li className="py-1">Email: {currentUser?.email}</li>
+                <li className="flex justify-center py-1">
+                  <img
+                    src={avatar}
+                    alt={"No avatar"}
+                    className="w-60 h-60 my-5 rounded-full"
+                  />
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );

@@ -1,31 +1,44 @@
-import { User } from "@/model/user";
 import axios from "axios";
+import authHeader from "./auth-header";
 
-const REST_API_BASE_URL = "http://localhost:8080/api/users";
+const API_URL = "http://localhost:8080/api/data/";
 
-export const getAllUsers = async (): Promise<User[]> => {
-  const response = await axios.get<User[]>(REST_API_BASE_URL);
-  return response.data;
+export const getPublicContent = () => {
+  return axios.get(API_URL + "all");
 };
 
-export const getUserById = async (id: number): Promise<User> => {
-  const response = await axios.get<User>(`${REST_API_BASE_URL}/${id}`);
-  return response.data;
+export const getGameOrders = (id: number) => {
+  return axios.get(API_URL + "game_orders/" + id, { headers: authHeader() });
 };
 
-export const addUser = async (user: Omit<User, "id">): Promise<User> => {
-  const response = await axios.post<User>(REST_API_BASE_URL, user);
-  return response.data;
+export const getModeratorBoard = () => {
+  return axios.get(API_URL + "mod", { headers: authHeader() });
 };
 
-export const updateUser = async (
-  id: number,
-  user: Omit<User, "id">
-): Promise<User> => {
-  const response = await axios.put<User>(`${REST_API_BASE_URL}/${id}`, user);
-  return response.data;
+export const getUsersForAdmin = () => {
+  return axios.get(API_URL + "admin/users", { headers: authHeader() });
 };
 
-export const deleteUser = async (id: number): Promise<void> => {
-  await axios.delete(`${REST_API_BASE_URL}/${id}`);
+export const getGameOrdersForAdmin = () => {
+  return axios.get(API_URL + "admin/game_orders", { headers: authHeader() });
 };
+
+export const deleteUser = (id: number) => {
+  return axios.delete(API_URL + "admin/delete_user/" + id, { headers: authHeader() });
+}
+
+export const updateUser = (id: number, username: string, email: string) => {
+  return axios.put(API_URL + "admin/update_user/" + id, { username, email }, { headers: authHeader() });
+}
+
+export const addGameOrder = (userId: number, gameOrder: any) => {
+  return axios.post(API_URL + "mod/add_game_order/" + userId, gameOrder, { headers: authHeader() });
+}
+
+export const deleteGameOrder = (id: number) => {
+  return axios.delete(API_URL + "mod/delete_game_order/" + id, { headers: authHeader() });
+}
+
+export const updateGameOrder = (id: number, gameOrder: any) => {
+  return axios.put(API_URL + "mod/update_game_order/" + id, gameOrder, { headers: authHeader() });
+}

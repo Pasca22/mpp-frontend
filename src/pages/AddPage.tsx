@@ -13,14 +13,24 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
-import { addUser } from "@/service/user_service";
+import { Navigate, NavigateFunction, useNavigate } from "react-router-dom";
+import { getCurrentUser, register } from "@/service/auth_service";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UsersContext } from "@/model/userContext";
 import Swal from "sweetalert2";
 
 const AddPage: React.FC = () => {
-  const UsersContextValue = React.useContext(UsersContext);
-  const allUsers = UsersContextValue.users;
-  const setAllUsers = UsersContextValue.setUsers;
+  const currentUser = getCurrentUser();
+  let navigate: NavigateFunction = useNavigate();
+  const allUsers = React.useContext(UsersContext).allUsers;
+  const setAllUsers = React.useContext(UsersContext).setAllUsers;
 
   const formSchema = z.object({
     username: z
@@ -37,8 +47,7 @@ const AddPage: React.FC = () => {
           "Password must contain at least 8 characters, including uppercase, lowercase letters and numbers",
       })
       .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
-    ip: z.string().min(1).ip(),
-    avatar: z.string().min(1),
+    role: z.enum(["USER", "MODERATOR", "ADMIN"]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,106 +56,160 @@ const AddPage: React.FC = () => {
       username: "",
       email: "",
       password: "",
-      ip: "",
-      avatar: "",
+      role: "USER",
     },
   });
 
-  async function addEntity(values: z.infer<typeof formSchema>) {
-    const newEntity = {
-      username: values.username,
-      email: values.email,
-      password: values.password,
-      ip: values.ip,
-      avatar: values.avatar,
-      gameOrders: [],
-    };
-    const newUser = await addUser(newEntity);
-    setAllUsers([...allUsers, newUser]);
+  const signout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
+
+  const userDetails = () => {
+    navigate("/account");
+  };
+
+  const goToHome = () => {
+    navigate("/home");
+  };
+
+  const addEntity = (values: z.infer<typeof formSchema>) => {
+    const role = [values.role];
+    if (values.role.includes("MODERATOR")) {
+      role.push("USER");
+    }
+    register(values.username, values.email, values.password, role).then(
+      (response) => {
+        const user = {
+          id: response.data.id,
+          username: response.data.username,
+          email: response.data.email,
+          roles: response.data.roles,
+          // gameOrders: response.data.gameOrders,
+        };
+        setAllUsers([...allUsers, user]);
+      }
+    );
     Swal.fire({
-      title: "User added successfully",
       icon: "success",
+      title: "User added successfully",
+      showConfirmButton: false,
+      timer: 1500,
     });
+    form.reset();
+  };
+
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <>
-      <div className="flex justify-center">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(addEntity)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Username</FormLabel>
-                  <FormControl className="w-80">
-                    <Input placeholder="boss123" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="lol@mai.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="max-w-80">
-                  <FormLabel className="flex justify-start">Password</FormLabel>
-                  <FormControl>
-                    <Input placeholder="catdog3" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ip"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">IP</FormLabel>
-                  <FormControl>
-                    <Input placeholder="172.0.0.5" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="avatar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-start">Avatar</FormLabel>
-                  <FormControl>
-                    <Input placeholder="good luck" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button
-              className="bg-green-500 hover:bg-green-600 px-10"
-              type="submit"
-            >
-              <PlusCircledIcon className="w-6 h-6 mr-1" />
-              Add
-            </Button>
-          </form>
-        </Form>
+      <div className="font-mono">
+        <header className="flex justify-end bg-gray-900 p-4">
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={goToHome}
+          >
+            Home
+          </span>
+          <span
+            className="flex text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={userDetails}
+          >
+            My account
+          </span>
+          <span
+            className="text-white text-lg mr-14 cursor-pointer hover:underline hover:underline-offset-2"
+            onClick={signout}
+          >
+            Sign Out
+          </span>
+        </header>
+        <div className="flex justify-center mt-8">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(addEntity)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Username
+                    </FormLabel>
+                    <FormControl className="w-80">
+                      <Input placeholder="boss123" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="lol@mai.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="max-w-80">
+                    <FormLabel className="flex justify-start text-xl">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="CatDog3" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={() => (
+                  <FormItem>
+                    <FormLabel className="flex justify-start text-xl">
+                      Role
+                    </FormLabel>
+                    <FormControl>
+                      <Select>
+                        <SelectTrigger className="max-w-80">
+                          <SelectValue placeholder="USER" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="USER">USER</SelectItem>
+                            <SelectItem value="MODERATOR">MODERATOR</SelectItem>
+                            <SelectItem value="ADMIN">ADMIN</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                className="bg-green-500 hover:bg-green-600 px-10"
+                type="submit"
+              >
+                <PlusCircledIcon className="w-6 h-6 mr-1" />
+                Add
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </>
   );
