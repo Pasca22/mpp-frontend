@@ -36,9 +36,13 @@ export const addGameOrder = (userId: number, gameOrder: any) => {
 }
 
 export const deleteGameOrder = (id: number) => {
-  return axios.delete(API_URL + "mod/delete_game_order/" + id, { headers: authHeader() });
+  return axios.delete(API_URL + "delete_game_order/" + id, { headers: authHeader() });
 }
 
 export const updateGameOrder = (id: number, gameOrder: any) => {
-  return axios.put(API_URL + "mod/update_game_order/" + id, gameOrder, { headers: authHeader() });
+  return axios.put(API_URL + "update_game_order/" + id, gameOrder, { headers: authHeader() });
+}
+
+export const addGameOrderByAdmin = (username: string, gameOrder: any) => {
+  return axios.post(API_URL + "admin/add_game_order/" + username, gameOrder, { headers: authHeader() });
 }

@@ -36,7 +36,6 @@ export const getCurrentUser = () => {
       username: json.username,
       email: json.email,
       roles: json.roles,
-      gameOrders: json.gameOrders,
     };
     return user;
   };

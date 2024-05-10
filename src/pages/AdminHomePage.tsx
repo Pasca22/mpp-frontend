@@ -17,7 +17,7 @@ import {
 import { getCurrentUser } from "@/service/auth_service";
 import { UsersContext } from "@/model/userContext";
 import React from "react";
-import { deleteUser } from "@/service/user_service";
+import { deleteGameOrder, deleteUser } from "@/service/user_service";
 
 const AdminHomePage: React.FC = () => {
   const currentUser = getCurrentUser();
@@ -25,6 +25,7 @@ const AdminHomePage: React.FC = () => {
   const allUsers = React.useContext(UsersContext).allUsers;
   const setAllUsers = React.useContext(UsersContext).setAllUsers;
   const gameOrders = React.useContext(UsersContext).gameOrders;
+  const setGameOrders = React.useContext(UsersContext).setGameOrders;
 
   const signout = () => {
     localStorage.removeItem("user");
@@ -55,8 +56,11 @@ const AdminHomePage: React.FC = () => {
   };
 
   const deleteGameOrderEvent = (id: number) => {
-    console.log(id);
-    // const index = gameOrders.findIndex((gameOrder) => gameOrder.id === id);
+    deleteGameOrder(id).then(() => {
+      setGameOrders((prevGameOrders) =>
+        prevGameOrders.filter((gameOrder) => gameOrder.id !== id)
+      );
+    });
   };
 
   if (!currentUser) {
@@ -144,16 +148,17 @@ const AdminHomePage: React.FC = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardFooter className="flex justify-center">
-                        <Button className="mx-2 ">
-                          <UpdateIcon className="w-5 h-5 mr-1" />
-                          Update
-                        </Button>
-
-                        <Button className="bg-red-600 mx-2  hover:bg-red-900">
-                          <CrossCircledIcon
-                            className="w-6 h-6 mr-1"
-                            onClick={() => deleteGameOrderEvent(gameOrder.id)}
-                          />
+                        <Link to={`/update_game_order/${gameOrder.id}`}>
+                          <Button className="mx-2 ">
+                            <UpdateIcon className="w-5 h-5 mr-1" />
+                            Update
+                          </Button>
+                        </Link>
+                        <Button
+                          className="bg-red-600 mx-2  hover:bg-red-900"
+                          onClick={() => deleteGameOrderEvent(gameOrder.id)}
+                        >
+                          <CrossCircledIcon className="w-6 h-6 mr-1" />
                           Delete
                         </Button>
                       </CardFooter>

@@ -16,7 +16,7 @@ import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/service/auth_service";
 import { UsersContext } from "@/model/userContext";
-import { addGameOrder } from "@/service/user_service";
+import { addGameOrder, addGameOrderByAdmin } from "@/service/user_service";
 import Swal from "sweetalert2";
 
 const AddGameOrderPage: React.FC = () => {
@@ -24,6 +24,7 @@ const AddGameOrderPage: React.FC = () => {
   const currentUser = getCurrentUser();
   const gameOrders = React.useContext(UsersContext).gameOrders;
   const setGameOrders = React.useContext(UsersContext).setGameOrders;
+  const isAdmin = currentUser?.roles.includes("ROLE_ADMIN");
 
   const formSchema = z.object({
     name: z
@@ -33,6 +34,9 @@ const AddGameOrderPage: React.FC = () => {
     description: z
       .string()
       .min(3, { message: "Game description must be at least 3 characters" }),
+    username: isAdmin
+      ? z.string().min(3, { message: "Username must be at least 3 characters" })
+      : z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,6 +45,7 @@ const AddGameOrderPage: React.FC = () => {
       name: "",
       price: 0,
       description: "",
+      username: "",
     },
   });
 
@@ -62,15 +67,37 @@ const AddGameOrderPage: React.FC = () => {
   };
 
   const addGameOrderEvent = (formValues: z.infer<typeof formSchema>) => {
-    addGameOrder(currentUser.id, formValues).then((response) => {
-      setGameOrders([...gameOrders, response.data]);
-      Swal.fire({
-        icon: "success",
-        title: "Game order added successfully",
-        showConfirmButton: false,
-        timer: 1500,
+    if (!isAdmin) {
+      addGameOrder(currentUser.id, formValues).then((response) => {
+        setGameOrders([...gameOrders, response.data]);
+        Swal.fire({
+          icon: "success",
+          title: "Game order added successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       });
-    });
+      return;
+    }
+
+    addGameOrderByAdmin(formValues.username ?? "", formValues)
+      .then((response) => {
+        setGameOrders([...gameOrders, response.data]);
+        Swal.fire({
+          icon: "success",
+          title: "Game order added successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: "error",
+          title: "Username not found",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      });
   };
 
   return (
@@ -151,6 +178,23 @@ const AddGameOrderPage: React.FC = () => {
                   </FormItem>
                 )}
               />
+              {isAdmin && (
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex justify-start text-xl">
+                        Username
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 px-10"
