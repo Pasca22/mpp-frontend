@@ -1,7 +1,7 @@
 import axios from "axios";
 import authHeader from "./auth-header";
 
-const API_URL = "http://localhost:8080/api/data/";
+const API_URL = "https://mpp-backend.happymoss-5afc6e08.northeurope.azurecontainerapps.io/api/data/";
 
 export const getPublicContent = () => {
   return axios.get(API_URL + "all");

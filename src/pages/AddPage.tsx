@@ -47,7 +47,8 @@ const AddPage: React.FC = () => {
           "Password must contain at least 8 characters, including uppercase, lowercase letters and numbers",
       })
       .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/),
-    role: z.enum(["USER", "MODERATOR", "ADMIN"]),
+    // role: z.enum(["USER", "MODERATOR", "ADMIN"]),
+    role: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,7 +76,7 @@ const AddPage: React.FC = () => {
 
   const addEntity = (values: z.infer<typeof formSchema>) => {
     const role = [values.role];
-    if (values.role.includes("MODERATOR")) {
+    if (values.role === "MODERATOR") {
       role.push("USER");
     }
     register(values.username, values.email, values.password, role).then(
@@ -85,7 +86,6 @@ const AddPage: React.FC = () => {
           username: response.data.username,
           email: response.data.email,
           roles: response.data.roles,
-          // gameOrders: response.data.gameOrders,
         };
         setAllUsers([...allUsers, user]);
       }
@@ -177,25 +177,29 @@ const AddPage: React.FC = () => {
               <FormField
                 control={form.control}
                 name="role"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex justify-start text-xl">
                       Role
                     </FormLabel>
-                    <FormControl>
-                      <Select>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
                         <SelectTrigger className="max-w-80">
-                          <SelectValue placeholder="USER" />
+                          <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="USER">USER</SelectItem>
-                            <SelectItem value="MODERATOR">MODERATOR</SelectItem>
-                            <SelectItem value="ADMIN">ADMIN</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="USER">USER</SelectItem>
+                          <SelectItem value="MODERATOR">MODERATOR</SelectItem>
+                          <SelectItem value="ADMIN">ADMIN</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}
